@@ -1,5 +1,11 @@
 module RegressionTablesXLSX
 
-greet() = print("Hello World!")
+using Reexport
+@reexport using RegressionTables
+using PythonCall
+
+export ExcelTable, AbstractExcel
+
+include("excel.jl")
 
 end # module RegressionTablesXLSX
