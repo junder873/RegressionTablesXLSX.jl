@@ -1,4 +1,4 @@
-module RegressionTablesXLSX
+module RegressionTablesExcel
 
 using Reexport
 @reexport using RegressionTables
@@ -8,4 +8,4 @@ export ExcelTable, AbstractExcel
 
 include("excel.jl")
 
-end # module RegressionTablesXLSX
+end # module RegressionTablesExcel
