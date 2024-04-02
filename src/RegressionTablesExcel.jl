@@ -1,11 +1,11 @@
-module RegressionTablesExcel
+module RegressionTablesXLSX
 
 using Reexport
 @reexport using RegressionTables
 using PythonCall
 
-export ExcelTable, AbstractExcel
+export XlsxTable, AbstractXlsx
 
-include("excel.jl")
+include("xlsx.jl")
 
-end # module RegressionTablesExcel
+end # module RegressionTablesXLSX

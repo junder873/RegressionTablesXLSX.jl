@@ -1,14 +1,14 @@
 
-abstract type AbstractExcel <: AbstractAscii end
-struct ExcelTable <: AbstractExcel end
+abstract type AbstractXlsx <: AbstractAscii end
+struct XlsxTable <: AbstractXlsx end
 
-RegressionTables.default_file(render::AbstractExcel, rrs) = "results.xlsx"
+RegressionTables.default_file(render::AbstractXlsx, rrs) = "results.xlsx"
 horizontal_gap_spacing(::AbstractRenderType) = 5
 vertical_gap_spacing(::AbstractRenderType) = 1
 col_padding(::AbstractRenderType) = 2
 print_gridlines(::AbstractRenderType) = false
-excel_font(::AbstractRenderType) = "Times New Roman"
-excel_font_size(::AbstractRenderType) = 12
+xlsx_font(::AbstractRenderType) = "Times New Roman"
+xlsx_font_size(::AbstractRenderType) = 12
 
 function next_col(s)
     if s == ""
@@ -76,19 +76,19 @@ function RegressionTables.bottomrule(render::AbstractRenderType, ws, tab, row, p
     underline_row(render, ws, tab, row, pyxl, "thin")
 end
 
-function Base.write(file::String, tab::RegressionTable{T}) where {T <: AbstractExcel}
-    write_excel(file, tab)
+function Base.write(file::String, tab::RegressionTable{T}) where {T <: AbstractXlsx}
+    write_xlsx(file, tab)
 end
-function Base.write(file::Tuple{String, String}, tab::RegressionTable{T}) where {T <: AbstractExcel}
-    write_excel(file[1], tab; sheet=file[2])
+function Base.write(file::Tuple{String, String}, tab::RegressionTable{T}) where {T <: AbstractXlsx}
+    write_xlsx(file[1], tab; sheet=file[2])
 end
 
 
-function write_excel(file::String, tab::RegressionTable{T}; sheet="Sheet") where {T}
+function write_xlsx(file::String, tab::RegressionTable{T}; sheet="Sheet") where {T}
     render = T()
     xlsx = pyimport("openpyxl")
-    xlsx.styles.DEFAULT_FONT.name=excel_font(render)
-    xlsx.styles.DEFAULT_FONT.size=excel_font_size(render)
+    xlsx.styles.DEFAULT_FONT.name=xlsx_font(render)
+    xlsx.styles.DEFAULT_FONT.size=xlsx_font_size(render)
     if isfile(file)
         wb = xlsx.load_workbook(file)
     else
@@ -106,7 +106,7 @@ function write_excel(file::String, tab::RegressionTable{T}; sheet="Sheet") where
 
             y = x.data[j]
             c = cell_name(i, col_index, tab)
-            write_excel(render, ws, c, y)
+            write_xlsx(render, ws, c, y)
             if x.print_underlines[j]
                 ws[c].border = xlsx.styles.borders.Border(bottom=xlsx.styles.borders.Side(border_style="thin"))
             end
@@ -118,7 +118,7 @@ function write_excel(file::String, tab::RegressionTable{T}; sheet="Sheet") where
                 "left"
             end
             ws[c].alignment = xlsx.styles.Alignment(horizontal=align)
-            ws[c].font = xlsx.styles.Font(name=excel_font(render), size=excel_font_size(render))
+            ws[c].font = xlsx.styles.Font(name=xlsx_font(render), size=xlsx_font_size(render))
 
             if isa(y, Pair)
                 merge_end = cell_name(i, col_index + length(last(y)) - 1, tab)
@@ -154,14 +154,14 @@ function write_excel(file::String, tab::RegressionTable{T}; sheet="Sheet") where
     wb.save(file)
 end
 
-excel_format(render::AbstractRenderType, x::Real; digits=RegressionTables.default_digits(render, x), args...) = "0." * "0"^digits
-excel_format(render::AbstractRenderType, x::RegressionTables.AbstractRegressionStatistic; digits=RegressionTables.default_digits(render, x), args...) = excel_format(render, RegressionTables.value(x); digits, args...)
-excel_format(render::AbstractRenderType, x::Int; args...) = "#,###"
-function excel_format(render::AbstractRenderType, x::RegressionTables.AbstractUnderStatistic; digits=RegressionTables.default_digits(render, x), args...)
-    below_decoration(render, excel_format(render, RegressionTables.value(x); digits, args...))
+xlsx_format(render::AbstractRenderType, x::Real; digits=RegressionTables.default_digits(render, x), args...) = "0." * "0"^digits
+xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractRegressionStatistic; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
+xlsx_format(render::AbstractRenderType, x::Int; args...) = "#,###"
+function xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractUnderStatistic; digits=RegressionTables.default_digits(render, x), args...)
+    below_decoration(render, xlsx_format(render, RegressionTables.value(x); digits, args...))
 end
-excel_format(render::AbstractRenderType, x::RegressionTables.CoefValue; digits=RegressionTables.default_digits(render, x), args...) = excel_format(render, RegressionTables.value(x); digits, args...)
-excel_format(render::AbstractRenderType, x::Union{Nothing, Missing}; args...) = ""
+xlsx_format(render::AbstractRenderType, x::RegressionTables.CoefValue; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
+xlsx_format(render::AbstractRenderType, x::Union{Nothing, Missing}; args...) = ""
 
 function escape_decorator(s)
     if s ∈ ('*', "*")
@@ -171,29 +171,29 @@ function escape_decorator(s)
     end
 end
 
-function write_excel(render, ws, cell, val; vargs...)
+function write_xlsx(render, ws, cell, val; vargs...)
     v = repr(render, val)
     ws[cell] = v
 end
 
-function write_excel(render, ws, cell, val::Union{RegressionTables.AbstractUnderStatistic, RegressionTables.AbstractRegressionStatistic}; fmt=excel_format(render, val), vargs...)
+function write_xlsx(render, ws, cell, val::Union{RegressionTables.AbstractUnderStatistic, RegressionTables.AbstractRegressionStatistic}; fmt=xlsx_format(render, val), vargs...)
     v = RegressionTables.value(val)
-    write_excel(render, ws, cell, v; fmt, vargs...)
+    write_xlsx(render, ws, cell, v; fmt, vargs...)
 end
 
-function write_excel(render, ws, cell, val::RegressionTables.CoefValue; fmt=excel_format(render, val), vargs...)
+function write_xlsx(render, ws, cell, val::RegressionTables.CoefValue; fmt=xlsx_format(render, val), vargs...)
     new_fmt = estim_decorator(render, fmt, RegressionTables.value_pvalue(val); sym=escape_decorator(default_symbol(render)))
     v = RegressionTables.value(val)
-    write_excel(render, ws, cell, v; fmt=new_fmt, vargs...)
+    write_xlsx(render, ws, cell, v; fmt=new_fmt, vargs...)
 end
 
 
-function write_excel(render, ws, cell, val::Real; fmt=excel_format(render, val), vargs...)
+function write_xlsx(render, ws, cell, val::Real; fmt=xlsx_format(render, val), vargs...)
     ws[cell] = val
     ws[cell].number_format = fmt
 end
 
 
-function write_excel(render, ws, cell, val::Pair; vargs...)
-    write_excel(render, ws, cell, first(val); vargs...)
+function write_xlsx(render, ws, cell, val::Pair; vargs...)
+    write_xlsx(render, ws, cell, first(val); vargs...)
 end

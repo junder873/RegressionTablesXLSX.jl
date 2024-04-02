@@ -1,5 +1,5 @@
 
-# RegressionTablesExcel.jl
+# RegressionTablesXLSX.jl
 
 This package is an extension of [RegressionTables.jl](https://github.com/jmboehm/RegressionTables.jl) that adds functionality to export a `RegressionTable` to the .xlsx format. This package reexports RegressionTables.jl, so using this package alone is an option. See the main package for the majority of the documentation.
 
@@ -12,27 +12,27 @@ There are two main reasons this package is a separate package:
 This package is not yet registered in the Julia registry, so installation is through the main link:
 
 ```julia
-] add "https://github.com/junder873/RegressionTablesExcel.jl.git"
+] add "https://github.com/junder873/RegressionTablesXLSX.jl.git"
 ```
 
 ## Usage
 
-Simply specify the render as `ExcelTable()` and provide a file to export to Excel:
+Simply specify the render as `XlsxTable()` and provide a file to export to XLSX:
 
 ```julia
-regtable(rr1, rr2, rr3; render=ExcelTable(), file="data.xlsx")
+regtable(rr1, rr2, rr3; render=XlsxTable(), file="data.xlsx")
 ```
 
 If you want to output the table to a specific tab, pass the file as a tuple:
 
 ```julia
-regtable(rr1, rr2, rr3; render=ExcelTable(), file=("data.xlsx", "first table"))
+regtable(rr1, rr2, rr3; render=XlsxTable(), file=("data.xlsx", "first table"))
 ```
 
 ## Example
 
 ```julia
-using RegressionTablesExcel, DataFrames, RDatasets, FixedEffectModels, GLM;
+using RegressionTablesXLSX, DataFrames, RDatasets, FixedEffectModels, GLM;
 df = dataset("datasets", "iris");
 rr1 = reg(df, @formula(SepalLength ~ SepalWidth + fe(Species)))
 rr2 = reg(df, @formula(SepalLength ~ SepalWidth + PetalLength + fe(Species)))
@@ -42,7 +42,7 @@ rr5 = glm(@formula(SepalWidth < 2.9 ~ PetalLength + PetalWidth + Species), df, B
 
 regtable(
     rr1,rr2,rr3,rr4,rr5;
-    render = ExcelTable(),
+    render = XlsxTable(),
     file = "regression.xlsx",
     labels = Dict(
         "versicolor" => "Versicolor",
@@ -67,6 +67,6 @@ regtable(
 
 ## Notes
 
-The `ExcelTable` is actually a subtype of the `AbstractAscii` types from the RegressionTables package. Therefore, editing the defaults for `AbstractAscii` will likewise change the results in the `ExcelTable` output (see [Customization and Defaults](https://jmboehm.github.io/RegressionTables.jl/stable/customization/) for more information).
+The `XlsxTable` is actually a subtype of the `AbstractAscii` types from the RegressionTables package. Therefore, editing the defaults for `AbstractAscii` will likewise change the results in the `XlsxTable` output (see [Customization and Defaults](https://jmboehm.github.io/RegressionTables.jl/stable/customization/) for more information).
 
-This package also tries to export numbers as real numbers with a custom format in Excel. Therefore, the information stored is not just the 3 (or how ever many you selected) digits, but the full number, allowing for easy one off adjustments.
+This package also tries to export numbers as real numbers with a custom format in XLSX. Therefore, the information stored is not just the 3 (or how ever many you selected) digits, but the full number, allowing for easy one off adjustments.

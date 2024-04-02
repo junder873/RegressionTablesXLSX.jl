@@ -1,4 +1,4 @@
-name = "RegressionTablesExcel"
+name = "RegressionTablesXLSX"
 uuid = "a520bc42-8d2b-4242-871f-594dcd070d18"
 authors = ["junder873 <junder873@gmail.com>"]
 version = "0.1.0"
