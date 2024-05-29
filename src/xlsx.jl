@@ -9,6 +9,8 @@ col_padding(::AbstractRenderType) = 2
 print_gridlines(::AbstractRenderType) = false
 xlsx_font(::AbstractRenderType) = "Times New Roman"
 xlsx_font_size(::AbstractRenderType) = 12
+initial_row_gap(::AbstractRenderType) = 0
+initial_col_gap(::AbstractRenderType) = 1
 
 function next_col(s)
     if s == ""
@@ -25,12 +27,10 @@ function row_val(row, tab::RegressionTable)
     row += 2*sum(row .> hor_gap)
     row += 2
     
-    row
+    row + initial_row_gap(tab.render)
 end
 
-function col_letter(col, tab::RegressionTable)
-    ver_gap = tab.vertical_gaps |> unique
-    col += sum(col .> ver_gap)
+function col_letter(col::Int)
     col_name = ""
     while col > 0
         col, rem = divrem(col, 26)
@@ -43,6 +43,11 @@ function col_letter(col, tab::RegressionTable)
     end
     col_name
 end
+function col_letter(col, tab::RegressionTable)
+    ver_gap = tab.vertical_gaps |> unique
+    col += sum(col .> ver_gap) + initial_col_gap(tab.render)
+    col_letter(col)
+end
 
 function cell_name(row, col, tab::RegressionTable)
     col_letter(col, tab) * string(row_val(row, tab))
@@ -52,7 +57,7 @@ end
 
 function underline_row(render::AbstractRenderType, ws, tab, row, pyxl, border_style)
     m = col_letter(size(tab, 2), tab) |> String
-    v = "A" * string(row+1)
+    v = col_letter(1, tab) * string(row+1)
     ws.row_dimensions[row+1].height = horizontal_gap_spacing(render)
     ws.row_dimensions[row+2].height = horizontal_gap_spacing(render)
     ws[v].border = pyxl.styles.borders.Border(bottom=pyxl.styles.borders.Side(border_style=border_style))
@@ -158,7 +163,7 @@ xlsx_format(render::AbstractRenderType, x::Real; digits=RegressionTables.default
 xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractRegressionStatistic; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
 xlsx_format(render::AbstractRenderType, x::Int; args...) = "#,###"
 function xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractUnderStatistic; digits=RegressionTables.default_digits(render, x), args...)
-    below_decoration(render, xlsx_format(render, RegressionTables.value(x); digits, args...))
+    RegressionTables.below_decoration(render, xlsx_format(render, RegressionTables.value(x); digits, args...))
 end
 xlsx_format(render::AbstractRenderType, x::RegressionTables.CoefValue; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
 xlsx_format(render::AbstractRenderType, x::Union{Nothing, Missing}; args...) = ""
@@ -182,7 +187,7 @@ function write_xlsx(render, ws, cell, val::Union{RegressionTables.AbstractUnderS
 end
 
 function write_xlsx(render, ws, cell, val::RegressionTables.CoefValue; fmt=xlsx_format(render, val), vargs...)
-    new_fmt = estim_decorator(render, fmt, RegressionTables.value_pvalue(val); sym=escape_decorator(default_symbol(render)))
+    new_fmt = RegressionTables.estim_decorator(render, fmt, RegressionTables.value_pvalue(val); sym=escape_decorator(RegressionTables.default_symbol(render)))
     v = RegressionTables.value(val)
     write_xlsx(render, ws, cell, v; fmt=new_fmt, vargs...)
 end
