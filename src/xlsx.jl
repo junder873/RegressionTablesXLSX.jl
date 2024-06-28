@@ -163,7 +163,7 @@ xlsx_format(render::AbstractRenderType, x::Real; digits=RegressionTables.default
 xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractRegressionStatistic; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
 xlsx_format(render::AbstractRenderType, x::Int; args...) = "#,###"
 function xlsx_format(render::AbstractRenderType, x::RegressionTables.AbstractUnderStatistic; digits=RegressionTables.default_digits(render, x), args...)
-    RegressionTables.below_decoration(render, xlsx_format(render, RegressionTables.value(x); digits, args...))
+    RegressionTables.below_decoration(render, xlsx_format(render, RegressionTables.value(x); digits, args...)) * ";" * RegressionTables.below_decoration(render, "-" * xlsx_format(render, RegressionTables.value(x); digits, args...))
 end
 xlsx_format(render::AbstractRenderType, x::RegressionTables.CoefValue; digits=RegressionTables.default_digits(render, x), args...) = xlsx_format(render, RegressionTables.value(x); digits, args...)
 xlsx_format(render::AbstractRenderType, x::Union{Nothing, Missing}; args...) = ""
